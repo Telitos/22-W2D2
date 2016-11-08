@@ -6,6 +6,8 @@ const app = express();
 // Why use this process.env here ?
 const PORT = process.env.PORT || 8080; // default port 8080
 
+app.set('view engine', 'ejs')
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
