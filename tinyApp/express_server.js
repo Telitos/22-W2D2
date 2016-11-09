@@ -30,12 +30,16 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
-  /*what does this exactly do?? Guess: upon receiving GET request with specified endpoint, it will
-  insert templateVars in urls_index wherver specify. Sortof like an import. Understanding to be refined*/
-
 });
 
+app.get("/urls/:id", (req, res) => {
+  let templateVars = { shortURL: req.params.id,
+    longURL: urlDatabase[req.params.id]};
+  res.render("urls_show", templateVars);
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
