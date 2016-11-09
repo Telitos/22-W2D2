@@ -11,10 +11,9 @@
     <ul>
         <% Object.keys(urls).forEach(function(key) { %>
         <li>URL: <%= urls[key] %>
-        <br>ShortURL: <%= key %> </li>
+        <br>This is your short URL: <a href="<%=`http://localhost:8080/u/${key}`%>"><%=`http://localhost:8080/u/${key}`%></a></li>
         <% }); %>
     </ul>
-<a href="www.goingNowhere.com">Click here to shorten your URL!</a>
-
+<a href="/urls/new">Click here to shorten your URL!</a>
 </body>
 </html>

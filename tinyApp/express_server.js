@@ -51,16 +51,18 @@ app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[shortURL];
   /*Only redirect if the specified url exists, else, just return an error message. Msg can be modified.*/
   if (!urlDatabase.hasOwnProperty(shortURL)){
-    res.end("<html><body>Aha, you didn't say the magic word...<br> The right url that is ...</body></html>\n");
+    res.end("<html><body>Aha, you didn't say the magic word...<br> Your url must have been invalid! ...</body></html>\n");
   } else {res.redirect(longURL)
   };
 });
 
 app.post("/urls", (req, res) => {
   let shortURL = urlGenerator.randomUrl()
-  let longURL = `/urls/${shortURL}`;
+  // let longURL = `/urls/${shortURL}`;
+  /*On the website, redirecting to the longURL above doesn't make any sense, so I'll change the endpoint for now.*/
   urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(longURL);
+  // res.redirect(longURL);
+  res.redirect("/urls")
 });
 
 app.listen(PORT, () => {
