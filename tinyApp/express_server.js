@@ -1,12 +1,14 @@
 "use strict";
 
-
+const bodyParser = require("body-parser");
+const urlGenerator = require("./randomGenerator");
 const express = require("express");
 const app = express();
 // Why use this process.env here ?
 const PORT = process.env.PORT || 8080; // default port 8080
 
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({extended: true}));
 
 
 const urlDatabase = {
@@ -28,8 +30,14 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  /*Here we could import lodash to turn urls into an array to simplify the forEach on the page.
+  However, urlDatabase must be an object so we can get the keys easily*/
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -38,8 +46,23 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  let shortURL = req.params.shortURL;
+  let longURL = urlDatabase[shortURL];
+  /*Only redirect if the specified url exists, else, just return an error message. Msg can be modified.*/
+  if (!urlDatabase.hasOwnProperty(shortURL)){
+    res.end("<html><body>Aha, you didn't say the magic word...<br> The right url that is ...</body></html>\n");
+  } else {res.redirect(longURL)
+  };
+});
+
+app.post("/urls", (req, res) => {
+  let shortURL = urlGenerator.randomUrl()
+  let longURL = `/urls/${shortURL}`;
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(longURL);
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
