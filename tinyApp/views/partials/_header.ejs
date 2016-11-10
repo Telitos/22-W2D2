@@ -1,4 +1,15 @@
-<title> This will be our header </title>
-<body>
-<p>Does this work?</p>
-</body>
+
+  <% if (!username) { %>
+    <form action="/login" method="POST" style="margin:150px;">
+      <label for="username">Enter Username:</label>
+      <input id="username" type="text" name="username" style="width: 300px">
+      <input type="submit" value="Sign in">
+    </form>
+
+   <% } else { %>
+       <p><%=`Your are logged in as ${username}`%><p>
+        <form method="POST" action="/logout">
+            <input type="submit" value="Logout">
+        </form>
+        <% } %>
+
