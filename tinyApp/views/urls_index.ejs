@@ -3,22 +3,37 @@
 <head>
   <title>TinyApp</title>
 </head>
-<body>
+<body background="iguana.jpg">
+<center>
 <header>
   <% include ./partials/_header %>
 </header>
 <h1>Welcome to your personal URL repo</h1>
-    <ul>
-        <% Object.keys(urls).forEach(function(key) { %>
-        <li> <%= key %> ---> <a href="<%=`http://localhost:8080/u/${key}`%>"><%= urls[key]%></a></li>
-        <form method="POST" action="<%=`/urls/${key}/delete`%>">
-          <input type="submit" value="Delete this URL">
-        </form>
-        <form method="GET" action="<%=`/urls/${key}`%>">
+    <table style="width:100%, height:100%">
+    <% Object.keys(urls).forEach(function(key) { %>
+      <tr>
+        <td><%= key %></td>
+        <td>---></td>
+        <td><a href="<%=`http://localhost:8080/u/${key}`%>"><%= urls[key]%></a></td>
+        <td>
+          <form method="POST" action="<%=`/urls/${key}/delete`%>">
+            <input type="submit" value="Delete this URL">
+          </form>
+        </td>
+        <td>
+          <form method="GET" action="<%=`/urls/${key}`%>">
           <input type="submit" value="Edit this URL">
-        </form>
+          </form>
+        </td>
+        </tr>
         <% }); %>
-    </ul>
-<a href="/urls/new">Click here to shorten your URL!</a>
+    </table>
+    <table style="width:50%">
+        <th>
+          <a href="/urls/new">Click here to shorten your URL!</a>
+        </th>
+    </table>
+  </center>
+</table>
 </body>
 </html>
