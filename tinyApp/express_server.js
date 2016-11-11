@@ -1,10 +1,11 @@
 "use strict";
 
 const bodyParser = require("body-parser");
-const urlGenerator = require("./randomGenerator");
+const randomGenerator = require("./randomGenerator");
 const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser');
+
 // Why use this process.env here ?
 const PORT = process.env.PORT || 8080; // default port 8080
 
@@ -22,6 +23,8 @@ const urlDatabase = {
   "test": "www.test.com"
 };
 
+const users = {}
+
 app.get("/", (req, res) => {
   // res.end("Hello!");
   res.redirect("/urls")
@@ -38,30 +41,35 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   /*Here we could import lodash to turn urls into an array to simplify the forEach on the page.
   However, urlDatabase must be an object so we can get the keys easily*/
-  let templateVars = { urls: urlDatabase,
-    username: req.cookies["username"] };
-    console.log("username: ", req.cookies["username"]);
+  const templateVars = { urls: urlDatabase,
+    username: req.cookies["username"],
+    user: req.cookies["client_id"] };
+    // console.log("username: ", req.cookies["username"]);
     // console.log(templateVars.urls.test)
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { urls: urlDatabase,
-    username: req.cookies["username"] };
+  const templateVars = { urls: urlDatabase,
+    username: req.cookies["username"],
+    user: req.cookies["client_id"],
+     };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
+  const templateVars = {
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"] };
+    username: req.cookies["username"],
+    user: req.cookies["client_id"]
+     };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL];
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
   /*Only redirect if the specified url exists, else, just return an error message. Msg can be modified.*/
   if (!urlDatabase.hasOwnProperty(shortURL)){
     res.end(`<html><body>Aha, your url have been invalid must have been invalid!...
@@ -70,8 +78,22 @@ app.get("/u/:shortURL", (req, res) => {
   };
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = { urls: urlDatabase,
+    username: req.cookies["username"],
+    user: req.cookies["client_id"] };
+  res.render("urls_register", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = { urls: urlDatabase,
+    username: req.cookies["username"],
+    user: req.cookies["client_id"] };
+  res.render("urls_login", templateVars);
+});
+
 app.post("/urls", (req, res) => {
-  let shortURL = urlGenerator.randomUrl()
+  const shortURL = randomGenerator.randomUrl()
   // let longURL = `/urls/${shortURL}`;
   /*On the website, redirecting to the longURL above doesn't make any sense, so I'll change the endpoint for now.*/
   if (req.body.longURL[0] !== "h"){
@@ -84,20 +106,51 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let shortURL = req.params.shortURL
+  const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls")
 });
 
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username)
-  res.redirect("/")
+  const email = req.body.email;
+  const password = req.body.password;
+  // res.cookie("username", req.body.username);
+  // res.redirect("/")
+  const id = Object.keys(users).find((id) => users[id].email === email )
+  const user = users[id]
+  if (!id) {
+    res.end(`<html><body> Error 403, email ${email} does not exists.</body></html>\n`);
+  }
+  else if (user.password !== password) {
+    res.end(`<html><body> Error 403, Wrong password.</body></html>\n`)
+  }
+  else
+  {
+    console.log("this is the user:", id)
+    res.cookie("user_id", id);
+    console.log(user);
+    res.redirect("/")
+  }
 });
-
 
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('/');
+});
+
+app.post("/register", (req, res) => {
+  // const { email, password } = req.body;
+  const email = req.body.email;
+  const password = req.body.password;
+  if (Object.keys(users).find((id) => users[id].email === email)) {
+    res.end(`<html><body> Error 400, Email ${email} already exists </body></html>\n`)
+  } else {
+    const id = randomGenerator.randomUrl();
+    users[id] = { id, email, password };
+    res.cookie("user_id", users[id]);
+    console.log(users);
+    res.redirect("/")
+  }
 });
 
 app.listen(PORT, () => {
