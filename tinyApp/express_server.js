@@ -17,11 +17,7 @@ which is part of express*/
 app.use(cookieParser());
 
 
-const urlDatabase = {
-  // "b2xVn2": "http://www.lighthouselabs.ca",
-  // "9sm5xK": "http://www.google.com",
-  "test": {id: "testid", longURL: "www.test.com"}
-};
+const urlDatabase = {};
 
 const users = {};
 
@@ -45,7 +41,11 @@ app.get("/urls", (req, res) => {
     username: req.cookies["username"],
     user: req.cookies["user_id"],
     userList: users };
-  res.render("urls_index", templateVars);
+  if (!users.hasOwnProperty(templateVars.user)) { //not suffient, if a cookie remained, this will return false, gotta check against database
+    res.redirect("/login")
+  } else {
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -68,14 +68,13 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[req.params.id],
     username: req.cookies["username"],
     user: req.cookies["user_id"],
-    userList: users
-     };
+    userList: users };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL]["longURL"];
   /*Only redirect if the specified url exists, else, just return an error message. Msg can be modified.*/
   if (!urlDatabase.hasOwnProperty(shortURL)) {
     res.status(400).send(`Your url have been invalid must have been invalid!...
@@ -109,7 +108,7 @@ app.post("/urls", (req, res) => {
   if (req.body.longURL[0] !== "h") {
     res.end("The format of your URL is not valid, please make sure to add http:// at the begining")
   } else if (!req.cookies["user_id"]) {
-    res.status(400).end("Sorry, we can't recognize you, did you reset your cookies?")
+    res.status(400).send("Sorry, we can't recognize you, did you reset your cookies?")
   } else {
       urlDatabase[shortURL] = {id: req.cookies["user_id"], longURL: req.body.longURL}; // add object {id: user_id, longURL: longUrl}
     // res.redirect(longURL);
@@ -131,11 +130,13 @@ app.post("/login", (req, res) => {
   const id = Object.keys(users).find((id) => users[id].email === email );
   const user = users[id];
   if (!id) {
-    res.end(`<html><body> Error 403, email ${email} does not exists.</body></html>\n`);
-  }
-  else if (user.password !== password) {
-    res.end(`<html><body> Error 403, Wrong password.</body></html>\n`)
+    res.status(403).send(`Error 403, email ${email} does not exists.`);
+  } else if (!password) {
+    res.status(403).send(`Error 403, You did not enter any password!`);
+  } else if (user.password !== password) {
+    res.status(403).send(`Error 403, Wrong password.`);
   } else {
+    // must add code to check for empty password
     res.cookie("user_id", id);
     res.redirect("/");
   }
@@ -158,6 +159,19 @@ app.post("/register", (req, res) => {
     // res.cookie("user_id", users[id]["id"]);
     res.redirect("/")
   }
+});
+
+app.post("/urls/:shortURL", (req, res) => {
+  const templateVars = {
+    shortURL: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"],
+    user: req.cookies["user_id"],
+    userList: users };
+  const shortURL = req.params.shortURL;
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL]["longURL"] = longURL;
+  res.redirect("/");
 });
 
 app.listen(PORT, () => {

@@ -6,30 +6,39 @@
 <body background="/blue.jpg">
 <center>
 <header>
-  No header
+  <h1> Welcome to your private URL repository! Log in to begin! </h1>
 </header>
-<h1>Login Now!</h1>
 <form action="/login" method="POST" style="margin:150px;">
     <table style="width:100%, height:100%">
       <tr>
         <td>
           <label for="email">Enter your email adress:</label>
-          <input id="email" type="email" name="email" style="width: 300px">
+          <input id="email" type="email" name="email" style="width: 100%">
         </td>
       </tr>
       <tr>
         <td>
           <label for="password">Enter you password:</label>
-          <input id="password" type="password" name="password" style="width: 300px">
+          <input id="password" type="password" name="password" style="width: 100%">
         </td>
       </tr>
       <tr>
       <td>
-         <input type="submit" name="Register" style="width: 300px">
+         <input type="submit" name="login" value = "Login Now" style="width: 100%">
       </td>
       </tr>
     </table>
   </form>
+  <div>
+  <h2>Not a user? Register now!</h2>
+  <form action="/register" method="GET" style="margin:50px;">
+  <input type="submit" name="register" value="Register Now" style="width: 100%">
+  </form>
+  </div>
+
+
+
+
 </body>
 </center>
 </html>
