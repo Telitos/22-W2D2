@@ -18,15 +18,15 @@ app.use(cookieParser());
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
-  "test": "www.test.com"
+  // "b2xVn2": "http://www.lighthouselabs.ca",
+  // "9sm5xK": "http://www.google.com",
+  "test": {id: "testid", longURL: "www.test.com"}
 };
 
-const users = {}
+const users = {};
+
 
 app.get("/", (req, res) => {
-  // res.end("Hello!");
   res.redirect("/urls")
 });
 
@@ -43,18 +43,23 @@ app.get("/urls", (req, res) => {
   However, urlDatabase must be an object so we can get the keys easily*/
   const templateVars = { urls: urlDatabase,
     username: req.cookies["username"],
-    user: req.cookies["client_id"] };
-    // console.log("username: ", req.cookies["username"]);
-    // console.log(templateVars.urls.test)
+    user: req.cookies["user_id"],
+    userList: users };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { urls: urlDatabase,
     username: req.cookies["username"],
-    user: req.cookies["client_id"],
-     };
-  res.render("urls_new", templateVars);
+    user: req.cookies["user_id"],
+    userList: users };
+  // console.log("this is the user:", users[req.cookies["user_id"]]);
+
+  if (users.hasOwnProperty(req.cookies["user_id"])) {
+    res.render("urls_new", templateVars)
+  } else {
+    res.status(400).send("Sorry your are not logged in, please log in to add your URLs!")
+  };
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -62,7 +67,8 @@ app.get("/urls/:id", (req, res) => {
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id],
     username: req.cookies["username"],
-    user: req.cookies["client_id"]
+    user: req.cookies["user_id"],
+    userList: users
      };
   res.render("urls_show", templateVars);
 });
@@ -71,24 +77,27 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
   /*Only redirect if the specified url exists, else, just return an error message. Msg can be modified.*/
-  if (!urlDatabase.hasOwnProperty(shortURL)){
-    res.end(`<html><body>Aha, your url have been invalid must have been invalid!...
-    <br> Make sure you added http:// at the begining when you uploaded your url</body></html>\n`);
-  } else {res.redirect(longURL)
+  if (!urlDatabase.hasOwnProperty(shortURL)) {
+    res.status(400).send(`Your url have been invalid must have been invalid!...
+    <br> Make sure you added http:// at the begining`);
+  } else {
+    res.redirect(longURL)
   };
 });
 
 app.get("/register", (req, res) => {
   const templateVars = { urls: urlDatabase,
     username: req.cookies["username"],
-    user: req.cookies["client_id"] };
+    user: req.cookies["user_id"],
+    userList: users };
   res.render("urls_register", templateVars);
 });
 
 app.get("/login", (req, res) => {
   const templateVars = { urls: urlDatabase,
     username: req.cookies["username"],
-    user: req.cookies["client_id"] };
+    user: req.cookies["user_id"],
+    userList: users };
   res.render("urls_login", templateVars);
 });
 
@@ -96,10 +105,13 @@ app.post("/urls", (req, res) => {
   const shortURL = randomGenerator.randomUrl()
   // let longURL = `/urls/${shortURL}`;
   /*On the website, redirecting to the longURL above doesn't make any sense, so I'll change the endpoint for now.*/
-  if (req.body.longURL[0] !== "h"){
+
+  if (req.body.longURL[0] !== "h") {
     res.end("The format of your URL is not valid, please make sure to add http:// at the begining")
+  } else if (!req.cookies["user_id"]) {
+    res.status(400).end("Sorry, we can't recognize you, did you reset your cookies?")
   } else {
-    urlDatabase[shortURL] = req.body.longURL;
+      urlDatabase[shortURL] = {id: req.cookies["user_id"], longURL: req.body.longURL}; // add object {id: user_id, longURL: longUrl}
     // res.redirect(longURL);
     res.redirect("/urls")
   }
@@ -108,7 +120,7 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 app.post("/login", (req, res) => {
@@ -116,25 +128,21 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   // res.cookie("username", req.body.username);
   // res.redirect("/")
-  const id = Object.keys(users).find((id) => users[id].email === email )
-  const user = users[id]
+  const id = Object.keys(users).find((id) => users[id].email === email );
+  const user = users[id];
   if (!id) {
     res.end(`<html><body> Error 403, email ${email} does not exists.</body></html>\n`);
   }
   else if (user.password !== password) {
     res.end(`<html><body> Error 403, Wrong password.</body></html>\n`)
-  }
-  else
-  {
-    console.log("this is the user:", id)
+  } else {
     res.cookie("user_id", id);
-    console.log(user);
-    res.redirect("/")
+    res.redirect("/");
   }
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie("user_id");
   res.redirect('/');
 });
 
@@ -147,8 +155,7 @@ app.post("/register", (req, res) => {
   } else {
     const id = randomGenerator.randomUrl();
     users[id] = { id, email, password };
-    res.cookie("user_id", users[id]);
-    console.log(users);
+    // res.cookie("user_id", users[id]["id"]);
     res.redirect("/")
   }
 });

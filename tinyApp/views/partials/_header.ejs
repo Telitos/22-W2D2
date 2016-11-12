@@ -1,11 +1,9 @@
-
-  <% if (true) { %>
+  <% if (!userList[user]) { %>
     <p>Already a user? Click <a href = /login>here</a> to login</p>
     <p>Not registered? Click <a href = /register>here</a> to register</p>
    <% } else { %>
-       <p><%=`Your are logged in as ${username}`%><p>
+   <p><%=`Your are logged in as ${userList[user]["email"]}`%><p>
         <form method="POST" action="/logout">
             <input type="submit" value="Logout">
         </form>
       <% } %>
-

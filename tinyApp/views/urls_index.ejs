@@ -10,23 +10,23 @@
 </header>
 <h1>Welcome to your personal URL repo</h1>
     <table style="width:100%, height:100%">
-    <% Object.keys(urls).forEach(function(key) { %>
+    <% for (id in urls) { %>
       <tr>
-        <td><%= key %></td>
+        <td><%= id %></td>
         <td>---></td>
-        <td><a href="<%=`http://localhost:8080/u/${key}`%>"><%= urls[key]%></a></td>
+        <td><a href="<%=`http://localhost:8080/u/${id}`%>"><%= urls[id]["longURL"]%></a></td>
         <td>
-          <form method="POST" action="<%=`/urls/${key}/delete`%>">
+          <form method="POST" action="<%=`/urls/${id}/delete`%>">
             <input type="submit" value="Delete this URL">
           </form>
         </td>
         <td>
-          <form method="GET" action="<%=`/urls/${key}`%>">
+          <form method="GET" action="<%=`/urls/${id}`%>">
           <input type="submit" value="Edit this URL">
           </form>
         </td>
         </tr>
-        <% }); %>
+        <% }; %>
     </table>
     <table style="width:50%">
         <th>
