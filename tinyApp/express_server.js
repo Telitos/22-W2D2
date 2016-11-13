@@ -123,18 +123,18 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const shortURL = randomGenerator.randomUrl()
+  const shortURL = randomGenerator.randomUrl();
   // let longURL = `/urls/${shortURL}`;
   /*On the website, redirecting to the longURL above doesn't make any sense, so I'll change the endpoint for now.*/
 
   if (req.body.longURL[0] !== "h") {
     res.status(400).send("Error 400. The format of your URL is not valid, please make sure to add http:// at the begining")
   } else if (!req.session.user_id) {
-    res.status(400).send("Error 400. Sorry, we can't recognize you, did you reset your cookies?")
+    res.status(401).send("Error 401. You are not logged in. <a href = /login>Click here</a> to get to the login page.")
   } else {
       urlDatabase[shortURL] = {id: req.session.user_id, longURL: req.body.longURL}; // add object {id: user_id, longURL: longUrl}
     // res.redirect(longURL);
-    res.redirect("/urls")
+    res.redirect(`/urls/${shortURL}`)
   }
 });
 
@@ -185,14 +185,21 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id],
-    // username: req.session["username"],
-    user: req.session.user_id,
-    userList: users };
-  const {shortURL, longURL} = req.params;
-  urlDatabase[shortURL]["longURL"] = longURL;
-  res.redirect("/");
+  const shortURL = req.params.shortURL;
+  const longURL = req.body.longURL;
+  const user = req.session.user_id;
+  if (!urlDatabase.hasOwnProperty(shortURL)) {
+    res.status(404).send(`Error 404. Short url ${shortURL} does not exist! Get back to <a href = /> Home Page</a>.`)
+  } else if (!users.hasOwnProperty(user)) {
+    res.status(401).send("Error 401, You must be logged in to access this page. <a href = /login>Click here</a> to get to the login page.");
+  } else if (user !== urlDatabase[shortURL]["id"]) {
+    res.status(403).send("Error 403. You are not the owner of this URL! <a href = /login>Click here</a> to log in as the right user");
+  } else {
+    console.log("this is the updated URL:", longURL)
+    urlDatabase[shortURL]["longURL"] = longURL;
+    console.log(urlDatabase[shortURL]["longURL"])
+    res.redirect(`/urls/${shortURL}`);
+  }
 });
 
 app.listen(PORT, () => {
