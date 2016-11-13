@@ -17,7 +17,8 @@ app.use(express.static('public')); //somethign is wrong here
 /*CookieParser helps us read sessions, not create them
 which is part of express*/
 // app.use(cookieParser());
-app.use(cookieSession({ keys: [0870987]}));
+app.use(cookieSession({ name: 'session',
+  keys: ['key1', 'key2']}));
 
 
 const urlDatabase = {};
@@ -146,7 +147,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  res.clearCookie("user_id"); // this no longer works
   res.redirect('/');
 });
 

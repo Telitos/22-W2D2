@@ -14,7 +14,7 @@
       <tr>
         <td><%= key %></td>
         <td>---></td>
-        <td><a href="<%=`http://localhost:8080/u/${key}`%>"><%= urls[key]%></a></td>
+        <td><a href="<%=`http://localhost:8080/u/${key}`%>"><%= urls[key]%></a></td>ls
         <td>
           <form method="POST" action="<%=`/urls/${key}/delete`%>">
             <input type="submit" value="Delete this URL">
