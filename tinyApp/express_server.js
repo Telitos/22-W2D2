@@ -111,7 +111,12 @@ app.get("/register", (req, res) => {
     // username: req.session.username,
     user: req.session.user_id,
     userList: users };
-  res.render("urls_register", templateVars);
+  if (users.hasOwnProperty(templateVars.user)) {
+    res.redirect("/");
+  } else {
+    res.status(200);
+    res.render("urls_register", templateVars);
+  }
 });
 
 app.get("/login", (req, res) => {
@@ -119,7 +124,12 @@ app.get("/login", (req, res) => {
     // username: req.session.username,
     user: req.session.user_id,
     userList: users };
-  res.render("urls_login", templateVars);
+  if (users.hasOwnProperty(templateVars.user)) {
+    res.redirect("/");
+  } else {
+    res.status(200);
+    res.render("urls_login", templateVars);
+  }
 });
 
 app.post("/urls", (req, res) => {
@@ -150,12 +160,12 @@ app.post("/login", (req, res) => {
   const id = Object.keys(users).find((id) => users[id].email === email );
   const user = users[id];
 
-  if (!id) {
-    res.status(403).send(`Error 403, email ${email} does not exists.`);
-  } else if (!password) {
-    res.status(403).send(`Error 403, You did not enter any password!`);
+  if(!password || !email) {
+    res.status(400).send(`Error 400, You did not enter any password or email address!`);
+  } else if (!id) {
+    res.status(400).send(`Error 400, email ${email} does not exists.`);
   } else if (!bcrypt.compareSync(password, user.hashed_password)) {
-    res.status(403).send(`Error 403, Wrong password.`);
+    res.status(403).send(`Error 401, Wrong password.`);
   } else {
     console.log('this is the id:', id)
     req.session.user_id = id;
@@ -174,13 +184,17 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
   const hashed_password = bcrypt.hashSync(password, 10);
-  if (Object.keys(users).find((id) => users[id].email === email)) {
-    res.status(400).send(`Error 400. Email ${email} already`)
+  let id = Object.keys(users).find((id) => users[id].email === email );
+
+  if (!password || !email) {
+    res.status(400).send(`Error 400, You did not enter any password or any email address!`);
+  } else if (id) {
+    res.status(400).send(`Error 400. Email ${email} already`);
   } else {
-    const id = randomGenerator.randomUrl();
+    id = randomGenerator.randomUrl();
     users[id] = { id, email, hashed_password };
-    // req.session("user_id", users[id]["id"]);
-    res.redirect("/")
+    req.session.user_id = users[id]["id"];
+    res.redirect("/");
   }
 });
 
@@ -195,9 +209,8 @@ app.post("/urls/:shortURL", (req, res) => {
   } else if (user !== urlDatabase[shortURL]["id"]) {
     res.status(403).send("Error 403. You are not the owner of this URL! <a href = /login>Click here</a> to log in as the right user");
   } else {
-    console.log("this is the updated URL:", longURL)
     urlDatabase[shortURL]["longURL"] = longURL;
-    console.log(urlDatabase[shortURL]["longURL"])
+    res.status(200)
     res.redirect(`/urls/${shortURL}`);
   }
 });
