@@ -84,7 +84,7 @@ app.get("/urls/:id", (req, res) => {
     user: req.session.user_id,
     userList: users };
   if (!urlDatabase.hasOwnProperty(templateVars.shortURL)) {
-    res.status(404).send("Error 404. The page you are trying to access does not exist.");
+    res.status(404).send("Error 404. The page you are trying to access does not exist! Get back to <a href = /> Home Page</a>.");
   }
   templateVars.longURL = urlDatabase[req.params.id]["longURL"];
   if (!users.hasOwnProperty(templateVars.user)) {
@@ -98,12 +98,10 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL]["longURL"];
-  /*Only redirect if the specified url exists, else, just return an error message. Msg can be modified.*/
-  if (!urlDatabase.hasOwnProperty(shortURL)) {
-    res.status(400).send(`Your url have been invalid must have been invalid!...
-    <br> Make sure you added http:// at the begining`);
+   if (!urlDatabase.hasOwnProperty(shortURL)) {
+    res.status(404).send("Error 404. This short url does not exist! Get back to <a href = /> Home Page</a>.");
   } else {
+    const longURL = urlDatabase[shortURL]["longURL"];
     res.redirect(longURL)
   };
 });
