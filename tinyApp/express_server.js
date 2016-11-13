@@ -21,13 +21,24 @@ app.use(cookieSession({ name: 'session',
   keys: ['key1', 'key2']}));
 
 
-const urlDatabase = {};
+const urlDatabase = {
+
+  //shortURL: {id: user_id, longURL: longurl}
+};
 
 const users = {};
 
 
 app.get("/", (req, res) => {
-  res.redirect("/urls")
+  const templateVars = { urls: urlDatabase,
+    // username: req.session.username,
+    user: req.session.user_id,
+    userList: users };
+  if (!users.hasOwnProperty(templateVars.user)) {
+    res.redirect("/login")
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
@@ -35,7 +46,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/hello", (req, res) => {
-  res.end("<html><body>Hello <b>World</b></body></html>\n")
+  res.end("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.get("/urls", (req, res) => {
@@ -46,8 +57,9 @@ app.get("/urls", (req, res) => {
     user: req.session.user_id,
     userList: users };
   if (!users.hasOwnProperty(templateVars.user)) {
-    res.status(401).send("Error 401, You must be logged in to access this page. \n <a href = /login>Click here</a> to get to the login page")
+    res.status(401).send("Error 401, You must be logged in to access this page. \n <a href = /login>Click here</a> to get to the login page.");
   } else {
+    res.status(200);
     res.render("urls_index", templateVars);
   }
 });
@@ -60,20 +72,28 @@ app.get("/urls/new", (req, res) => {
   // console.log("this is the user:", users[req.sessions["user_id"]]);
 
   if (users.hasOwnProperty(req.session.user_id)) {
-    res.render("urls_new", templateVars)
+    res.status(200);
+    res.render("urls_new", templateVars);
   } else {
-    res.status(400).send("Sorry your are not logged in, please log in to add your URLs!")
+    res.status(400).send("Error 401, You must be logged in to access this page. \n <a href = /login>Click here</a> to get to the login page.");
   };
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = {
-    shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id],
-    // username: req.session.username,
+  const templateVars = {shortURL: req.params.id,
     user: req.session.user_id,
     userList: users };
-  res.render("urls_show", templateVars);
+  if (!urlDatabase.hasOwnProperty(templateVars.shortURL)) {
+    res.status(404).send("Error 404. The page you are trying to access does not exist.");
+  }
+  templateVars.longURL = urlDatabase[req.params.id]["longURL"];
+  if (!users.hasOwnProperty(templateVars.user)) {
+    res.status(401).send("Error 401, You must be logged in to access this page. \n <a href = /login>Click here</a> to get to the login page.");
+  } else if (templateVars.user !== urlDatabase[templateVars.shortURL]["id"]) {
+    res.status(403).send("Error 403. You are not the owner of this URL! <a href = /login>Click here</a> to log in as the right user");
+  } else {
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {

@@ -8,6 +8,10 @@
   <% include ./partials/_header %>
 </header>
    <h1>Short URL: <%= shortURL %></h1>
+   <h2>Long URL: <%= longURL %></h2>
+      <form method="POST" action="<%=`/urls/${shortURL}/delete`%>">
+      <input type="submit" value="Delete this URL">
+    </form>
     <form action="<%=`/urls/${shortURL}`%>" method="POST">
       <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
       <input type="submit" value="Update">
