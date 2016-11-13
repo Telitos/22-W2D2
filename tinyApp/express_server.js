@@ -165,7 +165,7 @@ app.post("/login", (req, res) => {
   } else if (!id) {
     res.status(400).send(`Error 400, email ${email} does not exists.`);
   } else if (!bcrypt.compareSync(password, user.hashed_password)) {
-    res.status(403).send(`Error 401, Wrong password.`);
+    res.status(401).send(`Error 401, Wrong password. <a href = /login>Click here</a> to get to the login page.`);
   } else {
     console.log('this is the id:', id)
     req.session.user_id = id;
@@ -187,7 +187,7 @@ app.post("/register", (req, res) => {
   let id = Object.keys(users).find((id) => users[id].email === email );
 
   if (!password || !email) {
-    res.status(400).send(`Error 400, You did not enter any password or any email address!`);
+    res.status(400).send(`Error 400, You did not enter any password or any email address! <a href = /register>Click here</a> to get to the register page.`);
   } else if (id) {
     res.status(400).send(`Error 400. Email ${email} already`);
   } else {

@@ -6,31 +6,32 @@
 <body background="/orange.jpg">
 <center>
 <header>
-  <h1> Welcome to your private URL repository! Log in to begin! </h1>
+  <h1> Welcome to your private URL repository!</h1>
+  <h2>Log in to begin! </h2>
 </header>
-<form action="/login" method="POST" style="margin:150px;">
+<form action="/login" method="POST">
     <table style="width:100%, height:100%">
       <tr>
         <td>
-          <label for="email">Enter your email adress:</label>
+          <label for="email"><b>Enter your email adress:</b></label>
           <input id="email" type="email" name="email" style="width: 100%">
         </td>
       </tr>
       <tr>
         <td>
-          <label for="password">Enter you password:</label>
+          <label for="password"><b>Enter you password:</b></label>
           <input id="password" type="password" name="password" style="width: 100%">
         </td>
       </tr>
       <tr>
       <td>
-         <input type="submit" name="login" value = "Login Now" style="width: 100%">
+         <input type="submit" name="login" value = "Login" style="width: 100%">
       </td>
       </tr>
     </table>
   </form>
   <h2>Not a user? Register now!</h2>
-  <form action="/register" method="GET" style="margin:150px;">
+  <form action="/register" method="GET" >
   <input type="submit" name="register" value="Register Now" style="width:100%, height:100%">
   </form>
 
