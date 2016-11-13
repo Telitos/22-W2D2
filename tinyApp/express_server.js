@@ -45,8 +45,8 @@ app.get("/urls", (req, res) => {
     // username: req.session.username,
     user: req.session.user_id,
     userList: users };
-  if (!users.hasOwnProperty(templateVars.user)) { //not suffient, if a session remained, this will return false, gotta check against database
-    res.redirect("/login")
+  if (!users.hasOwnProperty(templateVars.user)) {
+    res.status(401).send("Error 401, You must be logged in to access this page. \n <a href = /login>Click here</a> to get to the login page")
   } else {
     res.render("urls_index", templateVars);
   }
@@ -147,7 +147,9 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id"); // this no longer works
+  req.session = null;
+  // res.clearCookie("user_id"); // this no longer works
+  // req.logOut();
   res.redirect('/');
 });
 
