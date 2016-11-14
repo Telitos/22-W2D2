@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+//Next line creates a public folder for ease of access to images and the like
 app.use(express.static("public"));
 app.use(cookieSession({ name: "session", keys: ["key1", "key2"]}));
 
