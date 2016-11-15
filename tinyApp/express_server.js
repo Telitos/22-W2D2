@@ -154,7 +154,7 @@ app.post("/login", (req, res) => {
   if(!password || !email) {
     res.status(400).send(`Error 400, You did not enter any password or email address!`);
   } else if (!id) {
-    res.status(400).send(`Error 400, email ${email} does not exists.`);
+    res.status(400).send(`Error 400, email ${email} does not exist.`);
   } else if (!bcrypt.compareSync(password, user.hashed_password)) {
     res.status(401).send(`Error 401, Wrong password. <a href = /login>Click here</a> to get to the login page.`);
   } else {

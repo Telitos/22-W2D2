@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Allows a user to register, sign in, shorten urls the users inputs and store them in a database only available to said user.
+Allows a user to register, sign in, shorten urls the user inputs and store them in a database only available to said user.
 
 ## Expected Usage
 
